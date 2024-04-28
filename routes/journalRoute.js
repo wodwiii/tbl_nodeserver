@@ -38,7 +38,7 @@ router.put('/entry/:journalId', async (req, res) => {
     try {
       const journalId = req.params.journalId;
       const { entry } = req.body;
-      const { Date, Account_title, Description, Debit_Amount, Credit_Amount } = entry;
+      const { Date, Description, D_Account_title, Debit_Amount, C_Account_title, Credit_Amount } = entry;
       if (!Date || !Account_title) {
         return res.status(400).json({ error: 'Date and Account_title are required fields' });
       }
@@ -46,7 +46,7 @@ router.put('/entry/:journalId', async (req, res) => {
       if (!journal) {
         return res.status(404).json({ error: 'Journal not found' });
       }
-      journal.entries.push({ Date, Account_title, Description, Debit_Amount, Credit_Amount });
+      journal.entries.push({ Date, Description, D_Account_title, Debit_Amount, C_Account_title, Credit_Amount });
       await journal.save();
       res.status(200).json({ message: 'Entry added successfully'});
     } catch (error) {
