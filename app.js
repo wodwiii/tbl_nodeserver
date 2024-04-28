@@ -17,7 +17,7 @@ mongoose.connect(process.env.MONGODB_URI, {
 
 app.use('/api/journals', journalRoutes);
 app.use(authRoute);
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 8000;
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });

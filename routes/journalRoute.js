@@ -35,44 +35,50 @@ router.get('/:userId', async (req, res) => {
 });
 
 router.put('/entry/:journalId', async (req, res) => {
-    try {
-      const journalId = req.params.journalId;
-      const { entry } = req.body;
-      const { Date, Description, D_Account_title, Debit_Amount, C_Account_title, Credit_Amount } = entry;
-      if (!Date || !Account_title) {
-        return res.status(400).json({ error: 'Date and Account_title are required fields' });
-      }
-      const journal = await Journal.findById(journalId);
-      if (!journal) {
-        return res.status(404).json({ error: 'Journal not found' });
-      }
-      journal.entries.push({ Date, Description, D_Account_title, Debit_Amount, C_Account_title, Credit_Amount });
-      await journal.save();
-      res.status(200).json({ message: 'Entry added successfully'});
-    } catch (error) {
-      console.error(error);
-      res.status(500).json({ error: 'Internal Server Error' });
+  try {
+    const { journalId } = req.params;
+    const { entries } = req.body;
+    if (!entries || !Array.isArray(entries) || entries.length === 0) {
+      return res.status(400).json({ error: 'Entries must be provided as a non-empty array' });
     }
-  });
+    const journal = await Journal.findById(journalId);
+    if (!journal) {
+      return res.status(404).json({ error: 'Journal not found' });
+    }
+    for (const entry of entries) {
+      const { Date, Description, Account_title, Debit_Amount, Credit_Amount } = entry;
+      if (!Date || !Description || !Account_title) {
+        return res.status(400).json({ error: 'All fields are required for each entry' });
+      }
+      journal.entries.push({ Date, Description, Account_title, Debit_Amount, Credit_Amount });
+    }
+    await journal.save();
+    res.status(200).json({ message: 'Entries added successfully' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
 
-  router.put('/entries/:entryId', async (req, res) => {
-    try {
-      const { entryId } = req.params;
-      const { updatedEntry } = req.body;
-      const journal = await Journal.findOne({ 'entries._id': entryId });
-      if (!journal) {
-        return res.status(404).json({ error: 'Journal containing the entry not found' });
-      }
-      const entryIndex = journal.entries.findIndex(entry => entry._id.toString() === entryId);
-      if (entryIndex === -1) {
-        return res.status(404).json({ error: 'Entry not found' });
-      }
-      journal.entries[entryIndex] = { ...journal.entries[entryIndex], ...updatedEntry };
-      await journal.save();
-      res.status(200).json({ message: 'Entry updated successfully', journal });
-    } catch (error) {
-      console.error(error);
-      res.status(500).json({ error: 'Internal Server Error' });
+router.put('/entries/:entryId', async (req, res) => {
+  try {
+    const { entryId } = req.params;
+    const { updatedEntry } = req.body;
+    const journal = await Journal.findOne({ 'entries._id': entryId });
+    if (!journal) {
+      return res.status(404).json({ error: 'Journal containing the entry not found' });
     }
-  });
+    const entryIndex = journal.entries.findIndex(entry => entry._id.toString() === entryId);
+    if (entryIndex === -1) {
+      return res.status(404).json({ error: 'Entry not found' });
+    }
+    journal.entries[entryIndex] = { ...journal.entries[entryIndex], ...updatedEntry };
+    await journal.save();
+    res.status(200).json({ message: 'Entry updated successfully', journal });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
 module.exports = router;
