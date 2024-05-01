@@ -27,8 +27,8 @@ router.post('/signup', async (req, res) => {
       return res.status(400).json({ error: 'Email already exists' });
     }
     const newUser = new User({
-      firstName,
-      lastName,
+      first_name: firstName,
+      last_name: lastName,
       email,
       password,
     });
