@@ -60,6 +60,20 @@ router.put('/entry/:journalId', async (req, res) => {
   }
 });
 
+router.delete('/entries/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const deletedTransaction = await Transaction.findByIdAndDelete(id);
+    if (!deletedTransaction) {
+      return res.status(404).json({ message: 'Transaction not found' });
+    }
+    res.json({ message: 'Transaction deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting transaction:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
 router.put('/entries/:entryId', async (req, res) => {
   try {
     const { entryId } = req.params;
