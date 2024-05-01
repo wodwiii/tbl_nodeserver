@@ -63,10 +63,13 @@ router.put('/entry/:journalId', async (req, res) => {
 router.delete('/entries/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    const deletedTransaction = await Transaction.findByIdAndDelete(id);
-    if (!deletedTransaction) {
-      return res.status(404).json({ message: 'Transaction not found' });
+    const journal = await Journal.findOne({ 'entries._id': id });
+    const entryIndex = journal.entries.findIndex(entry => entry._id.toString() === id);
+    if (entryIndex === -1) {
+      return res.status(404).json({ error: 'Entry not found in the journal' });
     }
+    journal.entries.splice(entryIndex, 1);
+    await journal.save();
     res.json({ message: 'Transaction deleted successfully' });
   } catch (error) {
     console.error('Error deleting transaction:', error);
